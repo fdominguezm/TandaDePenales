@@ -1,0 +1,19 @@
+using UnityEngine;  // <--- required for Debug
+
+// Goalkeeper jump
+public class JumpCommand : ICommand
+{
+    private readonly IKeepable _keeper;
+
+    public JumpCommand(IKeepable keeper) => _keeper = keeper;
+
+    public void Execute()
+    {
+        if (_keeper == null) return;
+        Debug.Log($"Keeper jumps! Direction: {_keeper.JumpDirection}");
+        EventManager.instance.EventKeeperJump(_keeper);
+
+        // Optional: Physics jump can be handled here
+        // _keeper.Jump();
+    }
+}
