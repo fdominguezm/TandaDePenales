@@ -716,9 +716,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 526976644}
-  - component: {fileID: 526976645}
-  - component: {fileID: 526976647}
   - component: {fileID: 526976646}
+  - component: {fileID: 526976647}
+  - component: {fileID: 526976645}
   m_Layer: 0
   m_Name: Managers
   m_TagString: Untagged
@@ -765,6 +765,7 @@ MonoBehaviour:
   playerKeeperStartPos: {fileID: 871621797}
   aiKeeperStartPos: {fileID: 871621797}
   goalCheckTimeout: 3
+  nextTurnDelay: 2
 --- !u!114 &526976646
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1862,8 +1863,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _kickableObject: {fileID: 1821601189}
-  _minPower: 10
-  _maxPower: 30
+  _minPower: 5
+  _maxPower: 10
   _kickDelay: 1
   _randomDelayVariation: 0.3
   _team: 1
@@ -1906,10 +1907,10 @@ SceneRoots:
   - {fileID: 526976644}
   - {fileID: 1566181707}
   - {fileID: 1821601186}
+  - {fileID: 1447383274}
   - {fileID: 321561783}
   - {fileID: 446508455}
   - {fileID: 1664507725}
   - {fileID: 200930212}
   - {fileID: 871621797}
-  - {fileID: 1447383274}
   - {fileID: 1819840128}

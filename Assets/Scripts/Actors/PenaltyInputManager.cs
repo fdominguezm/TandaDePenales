@@ -59,7 +59,6 @@ public class PenaltyInputManager : MonoBehaviour
             var kickCmd = new KickCommand(playerKick);
             EventQueueManager.Instance.AddCommand(kickCmd);
 
-            Debug.Log($"Kick released! Power: {_currentPower}");
         }
     }
 }

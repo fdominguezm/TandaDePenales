@@ -38,7 +38,6 @@ public class KickCommand : ICommand
 
         // Patear cuando llegue a la pelota
         _ball.Kick(_kickable);
-        Debug.Log($"Ball kicked! Direction: {_kickable.KickDirection}, Power: {_kickable.CurrentPower}");
         EventManager.instance.EventBallKicked(_kickable);
     }
 }

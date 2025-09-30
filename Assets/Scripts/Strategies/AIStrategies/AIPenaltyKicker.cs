@@ -80,7 +80,6 @@ public class AIPenaltyKicker : MonoBehaviour
         PenaltyGameManager gm = FindObjectOfType<PenaltyGameManager>();
         if (gm == null)
         {
-            Debug.LogWarning("AIPenaltyKicker: PenaltyGameManager no encontrado.");
             return;
         }
 
@@ -106,7 +105,6 @@ public class AIPenaltyKicker : MonoBehaviour
         _kickable.KickDirection = Random.Range(-1, 2);
         _kickable.CurrentPower = Random.Range(_minPower, _maxPower);
 
-        Debug.Log($"[AI Kicker] {gameObject.name} patea. Dir: {_kickable.KickDirection}, Power: {_kickable.CurrentPower}");
 
         KickCommand kickCmd = new KickCommand(_kickable);
         if (EventQueueManager.Instance != null)

@@ -10,7 +10,6 @@ public class JumpCommand : ICommand
     public void Execute()
     {
         if (_keeper == null) return;
-        Debug.Log($"Keeper jumps! Direction: {_keeper.JumpDirection}");
         EventManager.instance.EventKeeperJump(_keeper);
 
         // Optional: Physics jump can be handled here
