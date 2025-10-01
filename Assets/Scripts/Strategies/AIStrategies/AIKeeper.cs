@@ -11,19 +11,19 @@ public class AIKeeper : MonoBehaviour
 
     [Header("AI Settings")]
     [SerializeField] private bool _predictPlayerKick = true;
-    [SerializeField] private float _moveSpeed = 5f;
+    [SerializeField] private float moveSpeed = 5f;
 
     [Header("Goal Dimensions")]
-    [SerializeField] private float _arcHalfWidth = 4.5f; // mitad del ancho del arco (9 unidades)
+    [SerializeField] private float arcHalfWidth = 4.5f; // la mitad del ancho del arco
 
-
-    private Vector3 _startPos;
-    private int _chosenDirection = 0;
-    private Ball _ballToFollow;
+    private Vector3 startPos;
+    private Vector3 targetPos;
+    private bool moving = false;
 
     private void Awake()
     {
-        _startPos = transform.position;
+        startPos = transform.position;
+        targetPos = startPos;
     }
 
     private void OnEnable()
@@ -46,45 +46,46 @@ public class AIKeeper : MonoBehaviour
         Team kickerTeam = (kicker is MonoBehaviour mb && mb.CompareTag("Player")) ? Team.Player : Team.AI;
         if (kickerTeam == _team) return;
 
-        // Elegir zona del arco (-1=izq,0=centro,1=der)
-        _chosenDirection = _predictPlayerKick ? 
-            ((Random.value < 0.7f) ? kicker.KickDirection : Random.Range(-1, 2)) :
-            Random.Range(-1, 2);
+        // Elegir dirección (-1=izq,0=centro,1=der)
+        int chosenDir = _predictPlayerKick
+            ? ((Random.value < 0.7f) ? kicker.KickDirection : Random.Range(-1, 2))
+            : Random.Range(-1, 2);
 
-        if (_keeper != null) _keeper.JumpDirection = _chosenDirection;
+        if (_keeper != null)
+        {
+            _keeper.JumpDirection = chosenDir;
+            _keeper.HasJumped = true;
+        }
 
-        // Guardar la pelota para seguirla
-        _ballToFollow = FindObjectOfType<Ball>();
+        // Calcular target según la dirección elegida
+        targetPos = startPos; // centro por default
+        if (chosenDir == -1) targetPos.x = startPos.x - arcHalfWidth;
+        else if (chosenDir == 1) targetPos.x = startPos.x + arcHalfWidth;
+
+        moving = true;
     }
 
     private void Update()
     {
-        if (_ballToFollow == null) return;
+        if (!moving) return;
 
-        // Calcular posición final según la dirección elegida
-        float targetX = _startPos.x; // centro
-        if (_chosenDirection == -1) targetX = _startPos.x - _arcHalfWidth; // poste izquierdo
-        else if (_chosenDirection == 1) targetX = _startPos.x + _arcHalfWidth; // poste derecho
+        transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
 
-        // Seguir lateralmente la pelota pero limitarse al rango del poste
-        float followX = Mathf.Clamp(
-            _ballToFollow.transform.position.x,
-            _startPos.x - _arcHalfWidth,
-            _startPos.x + _arcHalfWidth
-        );
-
-        // Combinar movimiento hacia la dirección elegida y seguimiento de la pelota
-        // Para que no se pase de los límites, interpolamos hacia la posición de la pelota dentro del rango permitido
-        float newX = Mathf.MoveTowards(transform.position.x, followX, _moveSpeed * Time.deltaTime);
-        Vector3 targetPos = new Vector3(newX, transform.position.y, _startPos.z);
-
-        transform.position = targetPos;
+        // Si llegó al target, dejar de moverse
+        if (Vector3.Distance(transform.position, targetPos) < 0.01f)
+            moving = false;
     }
 
     public void ResetPosition()
     {
-        transform.position = _startPos;
-        if (_keeper != null) _keeper.JumpDirection = 0;
-        _ballToFollow = null;
+        transform.position = startPos;
+        targetPos = startPos;
+        moving = false;
+
+        if (_keeper != null)
+        {
+            _keeper.JumpDirection = 0;
+            _keeper.HasJumped = false;
+        }
     }
 }

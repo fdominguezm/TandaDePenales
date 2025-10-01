@@ -23,7 +23,7 @@ public class KeeperMovement : MonoBehaviour
 
     private void Update()
     {
-        if (_keepable == null)
+        if (_keepable == null || !_keepable.HasJumped)
             return;
 
         _targetPos = _startPos + Vector3.right * _keepable.JumpDirection * jumpDistance;
@@ -36,13 +36,14 @@ public class KeeperMovement : MonoBehaviour
 
     public void ResetKeeper(IKeepable keepable, Vector3 startPos)
     {
-        // Resetear posición
         _startPos = startPos;
         _targetPos = _startPos;
         transform.position = _startPos;
 
-        // Resetear dirección de salto
         if (keepable != null)
+        {
             keepable.JumpDirection = 0;
+            keepable.HasJumped = false; // reset flag
+        }
     }
 }

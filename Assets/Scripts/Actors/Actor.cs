@@ -10,6 +10,7 @@ public class Actor : MonoBehaviour, IKickable, IKeepable
 
     // IKeepable
     public int JumpDirection { get; set; }
+    public bool HasJumped { get; set; } = false; 
 
     public ActorStats ActorStats => _actorStats;
 

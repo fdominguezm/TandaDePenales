@@ -18,12 +18,16 @@ public class PenaltyInputManager : MonoBehaviour
     private float _currentPower;
     private bool _charging;
 
+    private bool canKick = true; // 🔹 nuevo flag
+
     private void Start() => _currentPower = _minPower;
 
     private void Update()
     {
         PenaltyGameManager manager = FindObjectOfType<PenaltyGameManager>();
         if (manager.GetCurrentTurn() != Team.Player) return;
+
+        if (!canKick) return;
 
         HandlePlayerInput();
     }
@@ -59,6 +63,13 @@ public class PenaltyInputManager : MonoBehaviour
             var kickCmd = new KickCommand(playerKick);
             EventQueueManager.Instance.AddCommand(kickCmd);
 
+            canKick = false; // 🔹 deshabilitar input hasta el siguiente turno
         }
+    }
+
+    // 🔹 Método público para habilitar el input al inicio de un turno
+    public void EnableKick()
+    {
+        canKick = true;
     }
 }

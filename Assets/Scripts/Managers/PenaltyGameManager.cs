@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PenaltyGameManager : MonoBehaviour
 {
@@ -99,8 +100,12 @@ public class PenaltyGameManager : MonoBehaviour
             playerKicker.SetActive(isPlayerTurn);
             playerKicker.transform.position = playerKickerStartPos.position;
             playerKicker.transform.rotation = playerKickerStartPos.rotation;
+            playerKicker.GetComponent<PenaltyInputManager>().EnableKick();
+            playerKicker.GetComponent<PlayerKickable>().CurrentPower = 0; // resetear potencia
+            playerKicker.GetComponent<PlayerKickable>().KickDirection = 0; // resetear dirección
         }
 
+        // AI Kicker
         if (aiKicker != null)
         {
             aiKicker.SetActive(!isPlayerTurn);
@@ -119,13 +124,22 @@ public class PenaltyGameManager : MonoBehaviour
             KeeperKeepable kk = playerKeeper.GetComponent<KeeperKeepable>();
             if (km != null && kk != null)
                 km.ResetKeeper(kk, playerKeeperStartPos.position);
+
+            // 🔹 Activar input del arquero para elegir dirección solo si es turno del AI
+            if (!isPlayerTurn)
+            {
+                var keeperInput = playerKeeper.GetComponent<KeeperInputManager>();
+                keeperInput?.EnableInputForNextKick();
+            }
         }
 
+        // AI Keeper
         if (aiKeeper != null)
         {
             aiKeeper.SetActive(isPlayerTurn);
             aiKeeper.transform.position = aiKeeperStartPos.position;
             aiKeeper.transform.rotation = aiKeeperStartPos.rotation;
+            aiKeeper.GetComponent<AIKeeper>().ResetPosition();
         }
 
         // Reset pelota
@@ -237,51 +251,53 @@ public class PenaltyGameManager : MonoBehaviour
         int remainingPlayerShots = shotsPerTeam - currentPlayerShots;
         int remainingAIShots = shotsPerTeam - currentAIShots;
 
-        // Primera fase: rondas normales
         if (!isSuddenDeath)
         {
-            // Ventaja imposible
             if (playerScore > (aiScore + remainingAIShots))
             {
-                Debug.Log($" -------- GANADOR: {Team.Player} --------");
-                EventManager.instance?.EventGameOver(true, Team.Player);
+                Debug.Log(" -------- GANADOR: Player --------");
+                LoadEndScene(true);
                 return;
             }
 
             if (aiScore > (playerScore + remainingPlayerShots))
             {
-                Debug.Log($" -------- GANADOR: {Team.AI} --------");
-                EventManager.instance?.EventGameOver(false, Team.AI);
+                Debug.Log(" -------- GANADOR: AI --------");
+                LoadEndScene(false);
                 return;
             }
 
-            // Todos los tiros completados
             if (currentPlayerShots >= shotsPerTeam && currentAIShots >= shotsPerTeam)
             {
                 if (playerScore == aiScore)
                 {
                     isSuddenDeath = true;
-                    shotsPerTeam++; // muerte súbita
+                    shotsPerTeam++;
                 }
                 else
                 {
-                    Team winner = (playerScore > aiScore) ? Team.Player : Team.AI;
-                    Debug.Log($" -------- GANADOR: {winner} --------");
-                    EventManager.instance?.EventGameOver(playerScore > aiScore, winner);
+                    bool playerWon = playerScore > aiScore;
+                    Debug.Log($" -------- GANADOR: {(playerWon ? Team.Player : Team.AI)} --------");
+                    LoadEndScene(playerWon);
                 }
             }
         }
-        // Muerte súbita
         else if (isSuddenDeath && currentPlayerShots == currentAIShots)
         {
             if (playerScore != aiScore)
             {
-                Team winner = (playerScore > aiScore) ? Team.Player : Team.AI;
-                Debug.Log($" -------- GANADOR: {winner} --------");
-                EventManager.instance?.EventGameOver(playerScore > aiScore, winner);
+                bool playerWon = playerScore > aiScore;
+                Debug.Log($" -------- GANADOR: {(playerWon ? Team.Player : Team.AI)} --------");
+                LoadEndScene(playerWon);
             }
         }
     }
 
     public Team GetCurrentTurn() => currentTurn;
+
+    private void LoadEndScene(bool playerWon)
+    {
+        string sceneName = playerWon ? "VictoryScene" : "DefeatScene";
+        SceneManager.LoadScene(sceneName);
+    }
 }

@@ -1252,11 +1252,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 470f2207fab7a446c9483b6f35b5d38e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _keeperObject: {fileID: 0}
+  _keeperObject: {fileID: 1447383269}
   _team: 1
   _predictPlayerKick: 1
-  _moveSpeed: 5
-  _arcHalfWidth: 4.5
+  moveSpeed: 5
+  arcHalfWidth: 4.5
 --- !u!54 &1447383270
 Rigidbody:
   m_ObjectHideFlags: 0
