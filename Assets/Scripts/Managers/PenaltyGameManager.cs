@@ -61,6 +61,8 @@ public class PenaltyGameManager : MonoBehaviour
 
     private void Start()
     {
+        ResetGame();
+
         if (EventManager.instance == null)
         {
             return;
@@ -72,6 +74,19 @@ public class PenaltyGameManager : MonoBehaviour
 
         SetupTurn();
         EventManager.instance?.EventRoundStart();
+    }
+
+    private void ResetGame()
+    {
+        playerScore = 0;
+        aiScore = 0;
+        currentPlayerShots = 0;
+        currentAIShots = 0;
+        currentTurn = Team.Player; // arranca siempre el Player
+        isSuddenDeath = false;
+
+        ballEnteredGoal = false;
+        turnResolved = false;
     }
 
     private void OnDestroy()

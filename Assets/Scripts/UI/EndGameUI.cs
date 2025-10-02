@@ -11,7 +11,7 @@ public class EndGameUI : MonoBehaviour
         SceneManager.LoadScene(mainGameSceneName);
     }
 
-    // Optional: Quit button if you want to exit game
+    // Quit button if you want to exit game
     public void QuitGame()
     {
         Debug.Log("Quitting game...");

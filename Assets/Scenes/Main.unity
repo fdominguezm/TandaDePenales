@@ -1561,7 +1561,7 @@ MonoBehaviour:
   _kickCenter: 115
   _kick: 32
   _minPower: 10
-  _maxPower: 30
+  _maxPower: 25
   _chargeSpeed: 15
 --- !u!114 &1566181709
 MonoBehaviour:
@@ -1863,8 +1863,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _kickableObject: {fileID: 1821601189}
-  _minPower: 5
-  _maxPower: 10
+  _minPower: 10
+  _maxPower: 25
   _kickDelay: 1
   _randomDelayVariation: 0.3
   _team: 1

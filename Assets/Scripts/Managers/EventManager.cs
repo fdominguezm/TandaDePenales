@@ -15,7 +15,6 @@ public class EventManager : MonoBehaviour
         }
 
         instance = this;
-        DontDestroyOnLoad(gameObject); // opcional, si querés que sobreviva a los cambios de escena
     }
     #endregion
 
