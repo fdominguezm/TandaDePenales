@@ -2,44 +2,80 @@ using UnityEngine;
 
 public class PenaltyInputManager : MonoBehaviour
 {
-    [SerializeField] private MonoBehaviour _playerKickable; // IKickable
+    [SerializeField]
+    private MonoBehaviour _playerKickable; // IKickable
     private IKickable playerKick => _playerKickable as IKickable;
 
     [Header("Kick Controls")]
-    [SerializeField] private KeyCode _kickLeft = KeyCode.A;
-    [SerializeField] private KeyCode _kickRight = KeyCode.D;
-    [SerializeField] private KeyCode _kickCenter = KeyCode.S;
-    [SerializeField] private KeyCode _kick = KeyCode.Space;
+    [SerializeField]
+    private KeyCode _kickLeft = KeyCode.A;
+
+    [SerializeField]
+    private KeyCode _kickRight = KeyCode.D;
+
+    [SerializeField]
+    private KeyCode _kickCenter = KeyCode.S;
+
+    [SerializeField]
+    private KeyCode _kick = KeyCode.Space;
 
     [Header("Kick Power")]
-    [SerializeField] private float _minPower = 5f;
-    [SerializeField] private float _maxPower = 20f;
-    [SerializeField] private float _chargeSpeed = 10f; // velocidad de carga de poder
+    [SerializeField]
+    private float _minPower = 5f;
+
+    [SerializeField]
+    private float _maxPower = 20f;
+
+    [SerializeField]
+    private float _chargeSpeed = 10f; // velocidad de carga de poder
     private float _currentPower;
     private bool _charging;
 
     private bool canKick = true; // 🔹 nuevo flag
 
-    private void Start() => _currentPower = _minPower;
+    private void Start()
+    {
+        if (EventManager.instance == null)
+        {
+            return;
+        }
+        _currentPower = _minPower;
+        EventManager.instance.OnRoundStart += EnableKick;
+    }
+
+    private void OnDestroy()
+    {
+        if (EventManager.instance == null)
+            return;
+
+        EventManager.instance.OnRoundStart -= EnableKick;
+    }
+
 
     private void Update()
     {
         PenaltyGameManager manager = FindObjectOfType<PenaltyGameManager>();
-        if (manager.GetCurrentTurn() != Team.Player) return;
+        if (manager.GetCurrentTurn() != Team.Player)
+            return;
 
-        if (!canKick) return;
+        if (!canKick)
+            return;
 
         HandlePlayerInput();
     }
 
     private void HandlePlayerInput()
     {
-        if (playerKick == null) return;
+        if (playerKick == null)
+            return;
 
         // Dirección del tiro
-        if (Input.GetKey(_kickLeft)) playerKick.KickDirection = -1;
-        else if (Input.GetKey(_kickRight)) playerKick.KickDirection = 1;
-        else if (Input.GetKey(_kickCenter)) playerKick.KickDirection = 0;
+        if (Input.GetKey(_kickLeft))
+            playerKick.KickDirection = -1;
+        else if (Input.GetKey(_kickRight))
+            playerKick.KickDirection = 1;
+        else if (Input.GetKey(_kickCenter))
+            playerKick.KickDirection = 0;
 
         // Si empieza a cargar (apretar espacio)
         if (Input.GetKeyDown(_kick))
@@ -71,5 +107,7 @@ public class PenaltyInputManager : MonoBehaviour
     public void EnableKick()
     {
         canKick = true;
+        playerKick.CurrentPower = 0;
+        playerKick.KickDirection = 0;
     }
 }

@@ -3,18 +3,22 @@ using UnityEngine;
 public class AIKeeper : MonoBehaviour
 {
     [Header("Keeper Reference")]
-    [SerializeField] private MonoBehaviour _keeperObject; // Debe implementar IKeepable
+    [SerializeField]
+    private MonoBehaviour _keeperObject; // Debe implementar IKeepable
     private IKeepable _keeper => _keeperObject as IKeepable;
 
     [Header("Team Info")]
-    [SerializeField] private Team _team = Team.AI;
+    [SerializeField]
+    private Team _team = Team.AI;
 
     [Header("AI Settings")]
-    [SerializeField] private bool _predictPlayerKick = true;
-    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField]
+
+    private float moveSpeed = 5f;
 
     [Header("Goal Dimensions")]
-    [SerializeField] private float arcHalfWidth = 4.5f; // la mitad del ancho del arco
+    [SerializeField]
+    private float arcHalfWidth = 4f;
 
     private Vector3 startPos;
     private Vector3 targetPos;
@@ -40,16 +44,17 @@ public class AIKeeper : MonoBehaviour
 
     private void HandleBallKicked(IKickable kicker)
     {
-        if (kicker == null) return;
+        if (kicker == null)
+            return;
 
         // Ignorar si es el turno del equipo del keeper
-        Team kickerTeam = (kicker is MonoBehaviour mb && mb.CompareTag("Player")) ? Team.Player : Team.AI;
-        if (kickerTeam == _team) return;
+        Team kickerTeam =
+            (kicker is MonoBehaviour mb && mb.CompareTag("Player")) ? Team.Player : Team.AI;
+        if (kickerTeam == _team)
+            return;
 
-        // Elegir dirección (-1=izq,0=centro,1=der)
-        int chosenDir = _predictPlayerKick
-            ? ((Random.value < 0.7f) ? kicker.KickDirection : Random.Range(-1, 2))
-            : Random.Range(-1, 2);
+        // Elegir SIEMPRE una dirección aleatoria (-1=izq, 0=centro, 1=der)
+        int chosenDir = Random.Range(-1, 2);
 
         if (_keeper != null)
         {
@@ -58,18 +63,25 @@ public class AIKeeper : MonoBehaviour
         }
 
         // Calcular target según la dirección elegida
-        targetPos = startPos; // centro por default
-        if (chosenDir == -1) targetPos.x = startPos.x - arcHalfWidth;
-        else if (chosenDir == 1) targetPos.x = startPos.x + arcHalfWidth;
+        targetPos = startPos;
+        if (chosenDir == -1)
+            targetPos.x = startPos.x - arcHalfWidth;
+        else if (chosenDir == 1)
+            targetPos.x = startPos.x + arcHalfWidth;
 
         moving = true;
     }
 
     private void Update()
     {
-        if (!moving) return;
+        if (!moving)
+            return;
 
-        transform.position = Vector3.MoveTowards(transform.position, targetPos, moveSpeed * Time.deltaTime);
+        transform.position = Vector3.MoveTowards(
+            transform.position,
+            targetPos,
+            moveSpeed * Time.deltaTime
+        );
 
         // Si llegó al target, dejar de moverse
         if (Vector3.Distance(transform.position, targetPos) < 0.01f)

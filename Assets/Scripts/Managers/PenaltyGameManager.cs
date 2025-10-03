@@ -47,10 +47,17 @@ public class PenaltyGameManager : MonoBehaviour
     [SerializeField]
     private float nextTurnDelay = 2f;
 
+    [Header("UI")]
+    [SerializeField]
+    private UIManager uiManager; // 🔹 referencia a UIManager
+
     private int playerScore = 0;
     private int aiScore = 0;
     private int currentPlayerShots = 0;
     private int currentAIShots = 0;
+
+    private int playerShotIndex = 0; // 🔹 tracking para UI
+    private int aiShotIndex = 0;
 
     private Team currentTurn = Team.Player;
     private bool isSuddenDeath = false;
@@ -72,6 +79,12 @@ public class PenaltyGameManager : MonoBehaviour
         EventManager.instance.OnGoalScored += OnGoalScored;
         EventManager.instance.OnMissedShot += OnMissedShot;
 
+        // Inicializar la UI
+        if (uiManager != null)
+        {
+            uiManager.InitializeUI();
+        }
+
         SetupTurn();
         EventManager.instance?.EventRoundStart();
     }
@@ -82,7 +95,9 @@ public class PenaltyGameManager : MonoBehaviour
         aiScore = 0;
         currentPlayerShots = 0;
         currentAIShots = 0;
-        currentTurn = Team.Player; // arranca siempre el Player
+        playerShotIndex = 0;
+        aiShotIndex = 0;
+        currentTurn = Team.Player;
         isSuddenDeath = false;
 
         ballEnteredGoal = false;
@@ -101,9 +116,12 @@ public class PenaltyGameManager : MonoBehaviour
 
     private void SetupTurn()
     {
-        turnResolved = false; // 🔹 permitir que la corrutina se ejecute para este turno
+        turnResolved = false;
 
         bool isPlayerTurn = currentTurn == Team.Player;
+
+        uiManager.ResetTexts();
+
 
         Debug.Log(
             $"--------- RESULT: Player {playerScore} - AI {aiScore} --------- TURNO: {currentTurn}"
@@ -115,9 +133,6 @@ public class PenaltyGameManager : MonoBehaviour
             playerKicker.SetActive(isPlayerTurn);
             playerKicker.transform.position = playerKickerStartPos.position;
             playerKicker.transform.rotation = playerKickerStartPos.rotation;
-            playerKicker.GetComponent<PenaltyInputManager>().EnableKick();
-            playerKicker.GetComponent<PlayerKickable>().CurrentPower = 0; // resetear potencia
-            playerKicker.GetComponent<PlayerKickable>().KickDirection = 0; // resetear dirección
         }
 
         // AI Kicker
@@ -140,7 +155,6 @@ public class PenaltyGameManager : MonoBehaviour
             if (km != null && kk != null)
                 km.ResetKeeper(kk, playerKeeperStartPos.position);
 
-            // 🔹 Activar input del arquero para elegir dirección solo si es turno del AI
             if (!isPlayerTurn)
             {
                 var keeperInput = playerKeeper.GetComponent<KeeperInputManager>();
@@ -185,17 +199,15 @@ public class PenaltyGameManager : MonoBehaviour
     private IEnumerator WaitForGoalOrTimeout(Team kickerTeam)
     {
         if (turnResolved)
-            yield break; // si ya se resolvió el turno, no hacemos nada
+            yield break;
         turnResolved = true;
-        ballEnteredGoal = false; // resetear al inicio
+        ballEnteredGoal = false;
 
         float timer = 0f;
         while (timer < goalCheckTimeout)
         {
             if (ballEnteredGoal)
-            {
                 break;
-            }
             timer += Time.deltaTime;
             yield return null;
         }
@@ -214,7 +226,7 @@ public class PenaltyGameManager : MonoBehaviour
             }
         }
 
-        ballEnteredGoal = false; // asegurar que queda limpio
+        ballEnteredGoal = false;
     }
 
     public void BallEnteredGoal() => ballEnteredGoal = true;
@@ -226,6 +238,15 @@ public class PenaltyGameManager : MonoBehaviour
         else
             aiScore++;
 
+        // 🔹 Actualizar UI
+        if (uiManager != null)
+        {
+            if (kickingTeam == Team.Player)
+                uiManager.SetPlayerAttempt(playerShotIndex++, true);
+            else
+                uiManager.SetAIAttempt(aiShotIndex++, true);
+        }
+
         IncrementShotCounter(kickingTeam);
         CheckEndCondition();
         EndTurnWithDelay();
@@ -233,6 +254,15 @@ public class PenaltyGameManager : MonoBehaviour
 
     private void OnMissedShot(Team kickingTeam)
     {
+        // 🔹 Actualizar UI
+        if (uiManager != null)
+        {
+            if (kickingTeam == Team.Player)
+                uiManager.SetPlayerAttempt(playerShotIndex++, false);
+            else
+                uiManager.SetAIAttempt(aiShotIndex++, false);
+        }
+
         IncrementShotCounter(kickingTeam);
         CheckEndCondition();
         EndTurnWithDelay();
@@ -256,6 +286,17 @@ public class PenaltyGameManager : MonoBehaviour
         yield return new WaitForSeconds(nextTurnDelay);
 
         currentTurn = (currentTurn == Team.Player) ? Team.AI : Team.Player;
+
+        // 🔹 En Sudden Death, resetear los slots para mostrar sólo 1 dash
+        if (isSuddenDeath && currentPlayerShots == currentAIShots)
+        {
+            if (uiManager != null)
+            {
+                uiManager.ResetPenaltyScores();
+                playerShotIndex = 0;
+                aiShotIndex = 0;
+            }
+        }
 
         SetupTurn();
         EventManager.instance?.EventRoundStart();
@@ -288,6 +329,8 @@ public class PenaltyGameManager : MonoBehaviour
                 {
                     isSuddenDeath = true;
                     shotsPerTeam++;
+
+                    uiManager?.EnableSuddenDeathMode();
                 }
                 else
                 {

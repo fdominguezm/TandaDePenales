@@ -362,6 +362,7 @@
 "Assets/Scripts/Managers/EventManager.cs"
 "Assets/Scripts/Managers/GoalDetection.cs"
 "Assets/Scripts/Managers/PenaltyGameManager.cs"
+"Assets/Scripts/Managers/UIManager.cs"
 "Assets/Scripts/Strategies/Actions/AIKickable.cs"
 "Assets/Scripts/Strategies/Actions/IKeepable.cs"
 "Assets/Scripts/Strategies/Actions/IKickable.cs"
